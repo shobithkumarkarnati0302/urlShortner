@@ -61,7 +61,6 @@ npm run dev
 ## API Endpoints
 - `POST /api/shorten` — Create a new short URL
 - `GET /:shortCode` — Redirect to the original long URL
-- (Optional) `GET /api/shorten` — List all links (admin)
 
 ---
 
