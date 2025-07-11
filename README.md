@@ -75,12 +75,6 @@ npm run dev
 }
 ```
 
----
-
-## Deployment
-- Deploy backend to [Render](https://render.com/), [Railway](https://railway.app/), [Heroku](https://heroku.com/), or your own server
-- Deploy frontend to [Vercel](https://vercel.com/), [Netlify](https://netlify.com/), or similar
-- Update backend base URL in code/config for production
 
 ---
 
