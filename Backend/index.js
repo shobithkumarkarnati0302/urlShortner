@@ -7,6 +7,9 @@ const urlRouter = require('./routes/url');
 
 const app = express();
 
+// Trust reverse proxy (needed for correct req.protocol on Render/Heroku etc.)
+app.set('trust proxy', 1);
+
 app.use(cors());
 app.use(express.json());
 

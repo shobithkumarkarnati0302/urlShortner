@@ -3,7 +3,7 @@ const shortid = require('shortid');
 const Url = require('../models/Url');
 
 const router = express.Router();
-const BASE_URL = process.env.BASE_URL || 'http://localhost:5000';
+const BASE_URL = process.env.BASE_URL || null;
 
 // POST /api/shorten
 router.post('/shorten', async (req, res) => {
@@ -31,7 +31,9 @@ router.post('/shorten', async (req, res) => {
   });
   await url.save();
 
-  const shortUrl = `${BASE_URL.replace(/\/$/, '')}/${shortCode}`;
+  // Prefer explicit BASE_URL; otherwise, derive from the incoming request
+  const base = (BASE_URL || `${req.protocol}://${req.get('host')}`).replace(/\/$/, '');
+  const shortUrl = `${base}/${shortCode}`;
   res.json({ shortUrl });
 });
 
