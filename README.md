@@ -1,6 +1,6 @@
 # URL Shortener (MERN Stack)
 
-A full-stack URL Shortener application built with the MERN stack (MongoDB, Express.js, React, Node.js). Easily convert long URLs into short, shareable links with optional custom aliases, expiry, and click tracking. Modern UI with Tailwind CSS.
+A full-stack URL Shortener application built with the MERN stack (MongoDB, Express.js, React, Node.js). Easily convert long URLs into short, shareable links with optional custom aliases, expiry, and click tracking. Modern UI with Tailwind CSS, dark mode, and UI animations.
 
 ---
 
@@ -9,14 +9,30 @@ A full-stack URL Shortener application built with the MERN stack (MongoDB, Expre
 - **Custom alias** support (e.g., `sho.rt/myalias`)
 - **Click tracking** for each short link
 - **Redirection** to original URLs
-- **Modern, responsive UI** (React + Tailwind CSS)
+- **Local history** saved in browser `localStorage` (copy/click later)
+- **Dark mode toggle** with persisted preference
+- **Tooltips & subtle animations** for a professional UX
+- **Modern, responsive UI** (React + Tailwind CSS v4 + Vite)
 
 ---
 
 ## Tech Stack
-- **Frontend:** React, Vite, Tailwind CSS
-- **Backend:** Node.js, Express.js, Mongoose
-- **Database:** MongoDB
+- **Frontend:** React (Vite), Tailwind CSS v4, Heroicons
+- **Backend:** Node.js, Express.js, Mongoose, dotenv
+- **Database:** MongoDB (Atlas or local)
+
+---
+
+## Configuration & Environment
+- `Backend/.env`
+  - `MONGO_URI` — Mongo connection string (Atlas or local). Example: `mongodb+srv://.../URL_Shortener?...`
+  - `PORT` — API port (default 5000)
+- Frontend API base is `http://localhost:5000` in `src/App.jsx`. For production, switch to your deployed API base (consider a `VITE_API_BASE` env var).
+
+## Deployment
+- Deploy backend to [Render](https://render.com/), [Railway](https://railway.app/), [Heroku](https://heroku.com/), or your own server
+- Deploy frontend to [Vercel](https://vercel.com/), [Netlify](https://netlify.com/), or similar
+- Update backend base URL in the frontend for production
 
 ---
 
@@ -36,7 +52,16 @@ cd urlshortner
 ```bash
 cd Backend
 npm install
-# Set your MongoDB URI in config.js or as MONGO_URI env variable
+
+# Create a .env file in Backend/ (example)
+cat > .env << 'EOF'
+MONGO_URI=mongodb+srv://<username>:<password>@<cluster-host>/<db-name>?retryWrites=true&w=majority
+PORT=5000
+EOF
+
+# Start the API server (hot reload)
+npm run dev
+# or
 npm start
 ```
 
@@ -47,6 +72,8 @@ npm install
 npm run dev
 ```
 
+Tailwind is already configured (Vite plugin + `tailwind.config.js` with `darkMode: 'class'`). The app applies your saved theme before mount to avoid flicker.
+
 ---
 
 ## Usage
@@ -55,12 +82,16 @@ npm run dev
 3. Click "Shorten URL" to generate a short link
 4. Share the short link (e.g., http://localhost:5000/abc123)
 5. Anyone visiting the short link will be redirected to the original URL
+6. Your recently shortened links appear in the history panel (stored in `localStorage`)
 
 ---
 
 ## API Endpoints
 - `POST /api/shorten` — Create a new short URL
+  - Body `{ longUrl: string, customAlias?: string, expiryDate?: string }`
+  - Response `{ shortUrl: string }`
 - `GET /:shortCode` — Redirect to the original long URL
+- (Optional) `GET /api/shorten` — List all links (admin)
 
 ---
 
