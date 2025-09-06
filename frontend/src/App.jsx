@@ -1,5 +1,10 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import axios from 'axios'
+import Header from './components/Header'
+import UrlForm from './components/UrlForm'
+import ResultCard from './components/ResultCard'
+import HistoryList from './components/HistoryList'
+import { CheckCircleIcon } from '@heroicons/react/24/outline'
 import './App.css'
 import './index.css'
 
@@ -9,6 +14,17 @@ function App() {
   const [shortUrl, setShortUrl] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+  const [history, setHistory] = useState([])
+  const [copiedKey, setCopiedKey] = useState(null)
+
+  useEffect(() => {
+    try {
+      const saved = JSON.parse(localStorage.getItem('url_history') || '[]')
+      if (Array.isArray(saved)) setHistory(saved)
+    } catch (e) {
+      console.error('Failed to load history from localStorage', e)
+    }
+  }, [])
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -21,51 +37,48 @@ function App() {
         customAlias: customAlias || undefined,
       })
       setShortUrl(res.data.shortUrl)
+
+      const entry = { longUrl, shortUrl: res.data.shortUrl, createdAt: new Date().toISOString() }
+      const next = [entry, ...history].slice(0, 50)
+      setHistory(next)
+      try { localStorage.setItem('url_history', JSON.stringify(next)) } catch {}
     } catch (err) {
       setError(err.response?.data?.error || 'Something went wrong')
     }
     setLoading(false)
   }
 
+  const clearHistory = () => { setHistory([]); localStorage.removeItem('url_history') }
+
+  const copy = async (value, key = null) => {
+    try { await navigator.clipboard.writeText(value); setCopiedKey(key ?? value); setTimeout(() => setCopiedKey(null), 1200) } catch {}
+  }
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-200 via-purple-200 to-pink-100 transition-all duration-700">
-      <div className="w-full max-w-md bg-white/90 rounded-2xl shadow-2xl p-8 relative overflow-hidden group hover:shadow-indigo-300 transition-shadow duration-300">
-        <h1 className="text-3xl font-extrabold mb-8 text-center text-indigo-700">
-          URL Shortener
-        </h1>
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4 mb-4">
-          <input
-            type="url"
-            placeholder="Enter long URL"
-            value={longUrl}
-            onChange={e => setLongUrl(e.target.value)}
-            required
-            className="px-4 py-3 border border-gray-300 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 transition shadow-sm"
+    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-pink-50 dark:from-gray-900 dark:via-gray-950 dark:to-gray-900 transition-colors">
+      <div className="max-w-3xl mx-auto px-4 py-10">
+        <Header />
+        <div className="w-full bg-white/90 dark:bg-gray-900/60 backdrop-blur rounded-2xl shadow-2xl ring-1 ring-black/5 dark:ring-white/10 p-6 md:p-8">
+          <UrlForm
+            longUrl={longUrl}
+            setLongUrl={setLongUrl}
+            customAlias={customAlias}
+            setCustomAlias={setCustomAlias}
+            loading={loading}
+            onSubmit={handleSubmit}
           />
-          <input
-            type="text"
-            placeholder="Custom alias (optional)"
-            value={customAlias}
-            onChange={e => setCustomAlias(e.target.value)}
-            className="px-4 py-3 border border-gray-300 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-pink-300 focus:border-pink-300 transition shadow-sm"
-          />
-          <button
-            type="submit"
-            disabled={loading}
-            className="bg-gradient-to-r from-indigo-500 to-pink-400 text-white py-3 rounded-lg font-bold shadow-md hover:from-indigo-600 hover:to-pink-500 transition-all duration-200 active:scale-95 disabled:opacity-60"
-          >
-            {loading ? 'Shortening...' : 'Shorten URL'}
-          </button>
-        </form>
-        {shortUrl && (
-          <div className="bg-green-50 border border-green-200 rounded-lg p-4 text-center flex flex-col items-center gap-2 animate-fade-in">
-            <p className="text-green-700 font-semibold">Shortened URL (use/copy this link):</p>
-            <a href={shortUrl} target="_blank" rel="noopener noreferrer" className="text-indigo-700 underline break-all font-mono hover:text-pink-500 transition-colors">{shortUrl}</a>
-            <span className="text-xs text-gray-500 mt-1">This link will redirect to your long URL.</span>
-          </div>
-        )}
-        {error && <div className="bg-red-50 border border-red-200 rounded-lg p-3 mt-2 text-red-700 text-center animate-fade-in">{error}</div>}
+
+          <ResultCard shortUrl={shortUrl} onCopy={() => copy(shortUrl, 'latest')} />
+          {error && <div className="bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-lg p-3 mt-2 text-red-700 dark:text-red-300 text-center animate-fade-in">{error}</div>}
+          <HistoryList history={history} copiedKey={copiedKey} onCopy={copy} onClear={clearHistory} />
+        </div>
       </div>
+
+      {copiedKey==='latest' && (
+        <div className="fixed bottom-4 left-1/2 -translate-x-1/2 bg-gray-900 text-white text-sm px-3 py-2 rounded-lg shadow-lg flex items-center gap-2">
+          <CheckCircleIcon className="w-4 h-4 text-green-400" /> Copied to clipboard
+        </div>
+      )}
     </div>
   )
 }
