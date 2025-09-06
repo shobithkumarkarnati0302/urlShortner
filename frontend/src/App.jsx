@@ -9,7 +9,9 @@ import './App.css'
 import './index.css'
 
 function App() {
-  const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:5000'
+  // Prefer same-origin '/api' by default to avoid exposing backend host in client code.
+  // In production, configure a reverse proxy/rewrites so '/api' points to your backend.
+  const API_BASE = (import.meta.env.VITE_API_BASE ?? '').replace(/\/$/, '')
   const [longUrl, setLongUrl] = useState('')
   const [customAlias, setCustomAlias] = useState('')
   const [shortUrl, setShortUrl] = useState('')

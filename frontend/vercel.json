@@ -1,0 +1,6 @@
+{
+  "rewrites": [
+    { "source": "/api/(.*)", "destination": "https://urlshortner-80ak.onrender.com/api/$1" },
+    { "source": "/:shortCode([a-zA-Z0-9_-]+)", "destination": "https://urlshortner-80ak.onrender.com/:shortCode" }
+  ]
+}
