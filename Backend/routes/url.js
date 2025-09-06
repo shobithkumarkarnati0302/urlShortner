@@ -30,7 +30,10 @@ router.post('/shorten', async (req, res) => {
   });
   await url.save();
 
-  const shortUrl = `http://localhost:5000/${shortCode}`;
+  const baseFromEnv = process.env.BASE_URL;
+  const baseFromReq = `${req.protocol}://${req.get('host')}`;
+  const baseUrl = baseFromEnv || baseFromReq;
+  const shortUrl = `${baseUrl}/${shortCode}`;
   res.json({ shortUrl });
 });
 
