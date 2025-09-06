@@ -32,8 +32,7 @@ function App() {
     setShortUrl('')
     setLoading(true)
     try {
-      const API_BASE = import.meta.env.VITE_API_BASE || window.location.origin
-      const res = await axios.post(`${API_BASE}/api/shorten`, {
+      const res = await axios.post('http://localhost:5000/api/shorten', {
         longUrl,
         customAlias: customAlias || undefined,
       })
