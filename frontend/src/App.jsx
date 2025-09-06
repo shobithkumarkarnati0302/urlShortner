@@ -9,6 +9,7 @@ import './App.css'
 import './index.css'
 
 function App() {
+  const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:5000'
   const [longUrl, setLongUrl] = useState('')
   const [customAlias, setCustomAlias] = useState('')
   const [shortUrl, setShortUrl] = useState('')
@@ -32,7 +33,7 @@ function App() {
     setShortUrl('')
     setLoading(true)
     try {
-      const res = await axios.post('http://localhost:5000/api/shorten', {
+      const res = await axios.post(`${API_BASE.replace(/\/$/, '')}/api/shorten`, {
         longUrl,
         customAlias: customAlias || undefined,
       })
