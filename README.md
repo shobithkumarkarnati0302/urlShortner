@@ -27,12 +27,35 @@ A full-stack URL Shortener application built with the MERN stack (MongoDB, Expre
 - `Backend/.env`
   - `MONGO_URI` — Mongo connection string (Atlas or local). Example: `mongodb+srv://.../URL_Shortener?...`
   - `PORT` — API port (default 5000)
-- Frontend API base is `http://localhost:5000` in `src/App.jsx`. For production, switch to your deployed API base (consider a `VITE_API_BASE` env var).
+  - `BASE_URL` — Domain used to generate public short links. In production set this to your frontend domain (e.g., `https://your-frontend.vercel.app`).
+- `frontend/.env`
+  - `VITE_API_BASE` — Optional. Defaults to same-origin in the app. In production you typically leave this unset and use rewrites/proxy (`/api` → backend).
 
 ## Deployment
 - Deploy backend to [Render](https://render.com/), [Railway](https://railway.app/), [Heroku](https://heroku.com/), or your own server
 - Deploy frontend to [Vercel](https://vercel.com/), [Netlify](https://netlify.com/), or similar
-- Update backend base URL in the frontend for production
+
+### Recommended production setup (hide backend URL)
+1. Backend (e.g., Render)
+   - Set env vars: `MONGO_URI`, `PORT` (platform-managed), and
+     - `BASE_URL=https://<your-frontend-domain>`
+   - This makes the API return short links like `https://<your-frontend-domain>/<code>`.
+2. Frontend (Vercel)
+   - Add `vercel.json` rewrites in `frontend/` to proxy API and redirects to backend:
+
+```json
+{
+  "rewrites": [
+    { "source": "/api/(.*)", "destination": "https://<your-backend-domain>/api/$1" },
+    { "source": "/:shortCode([a-zA-Z0-9_-]+)", "destination": "https://<your-backend-domain>/:shortCode" }
+  ]
+}
+```
+
+   - Leave `VITE_API_BASE` unset so the app calls `/api/...` and Vercel forwards it.
+   - Redeploy the frontend.
+
+This approach keeps the backend host hidden; the browser interacts only with the frontend domain.
 
 ---
 
